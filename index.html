@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chabad of Brookmont — Grant Scout</title>
+<style>
+  :root {
+    --green: #1a7a4a;
+    --green-bg: #e6f4ec;
+    --red: #c0392b;
+    --red-bg: #fdecea;
+    --yellow: #b7860b;
+    --yellow-bg: #fef9e7;
+    --blue: #1a5276;
+    --blue-bg: #eaf0f9;
+    --gray: #555;
+    --border: #ddd;
+    --font: 'Segoe UI', Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: #f5f7fa; color: #222; }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #003087 0%, #1a5276 100%);
+    color: white;
+    padding: 20px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  header .brand { display: flex; align-items: center; gap: 14px; }
+  header .logo { font-size: 2rem; }
+  header h1 { font-size: 1.4rem; font-weight: 700; }
+  header p.subtitle { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
+  .last-updated { font-size: 0.8rem; opacity: 0.75; text-align: right; }
+
+
+  /* LEGEND */
+  .legend {
+    display: flex;
+    gap: 18px;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--gray); }
+  .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .dot-green { background: var(--green); }
+  .dot-red { background: var(--red); }
+  .dot-yellow { background: var(--yellow); }
+  .dot-gray { background: #aaa; }
+
+  /* EXPAND BUTTON */
+  .expand-btn { background:none; border:none; cursor:pointer; color:#003087; padding:5px 8px; border-radius:4px; font-size:1.05rem; line-height:1; transition:transform 0.25s, background 0.1s; display:block; margin:auto; }
+  .expand-btn:hover { background:rgba(0,48,135,0.09); }
+  .expand-btn.open { transform:rotate(180deg); }
+
+  /* DETAIL ROW */
+  tr.detail-row > td { padding:0 !important; border-bottom:2px solid #003087; }
+  .detail-panel { background:#eef2f8; padding:14px 24px 16px; display:grid; grid-template-columns:1fr 1fr; gap:20px; font-size:0.84rem; }
+  .detail-block h4 { font-size:0.71rem; text-transform:uppercase; letter-spacing:0.06em; color:#777; margin-bottom:5px; font-weight:700; }
+  .detail-block p { color:#333; line-height:1.6; margin:0; white-space:pre-line; }
+  @media(max-width:700px){ .detail-panel { grid-template-columns:1fr; } }
+
+  /* SECTION HEADERS */
+  .section-header {
+    background: #f0f4f8;
+    border-bottom: 2px solid var(--border);
+    padding: 10px 30px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #444;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* GRANTS TABLE */
+  .table-wrap { overflow-x: auto; padding: 0 0 4px; }
+  table { width: 100%; border-collapse: collapse; min-width: 900px; }
+  thead th {
+    background: #003087;
+    color: white;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  thead th:hover { background: #004ab3; }
+  thead th .sort-arrow { margin-left: 4px; opacity: 0.6; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:hover { background: #f8fafc !important; }
+  tbody td { padding: 10px 12px; font-size: 0.88rem; vertical-align: top; }
+
+  /* ROW COLOURS */
+  tr.row-new { background: var(--green-bg); }
+  tr.row-urgent { background: var(--red-bg); }
+  tr.row-approaching { background: var(--yellow-bg); }
+  tr.row-normal { background: white; }
+  tr.row-closed { background: #f9f9f9; opacity: 0.7; }
+
+  /* PILLS */
+  .pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .pill-open { background: #d4edda; color: #155724; }
+  .pill-upcoming { background: #d1ecf1; color: #0c5460; }
+  .pill-watch { background: #fff3cd; color: #856404; }
+  .pill-relationship { background: #e2d9f3; color: #4a2c6b; }
+  .pill-closed { background: #e2e3e5; color: #383d41; }
+
+  .pill-not-started { background: #e2e3e5; color: #383d41; }
+  .pill-applied { background: #cce5ff; color: #004085; }
+  .pill-awarded { background: #d4edda; color: #155724; }
+  .pill-declined { background: #f8d7da; color: #721c24; }
+
+  /* STATUS DROPDOWN */
+  .status-select {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 6px;
+    font-size: 0.78rem;
+    background: white;
+    cursor: pointer;
+  }
+
+  /* AMOUNT */
+  .amount { font-weight: 600; color: var(--green); white-space: nowrap; }
+  .deadline { white-space: nowrap; }
+  .deadline.urgent { color: var(--red); font-weight: 700; }
+  .deadline.soon { color: var(--yellow); font-weight: 600; }
+
+  .funder-name { font-weight: 600; }
+  .program-name { font-size: 0.8rem; color: var(--gray); margin-top: 2px; }
+  .grant-link { font-size: 0.75rem; color: #003087; text-decoration: none; }
+  .grant-link:hover { text-decoration: underline; }
+
+  /* PROMPT CARDS */
+  .prompts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 16px;
+    padding: 20px 30px;
+  }
+  .prompt-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .prompt-card h3 { font-size: 0.95rem; font-weight: 700; color: #003087; }
+  .prompt-card .prompt-meta { font-size: 0.78rem; color: var(--gray); display: flex; gap: 12px; flex-wrap: wrap; }
+  .prompt-card .prompt-text {
+    background: #f5f7fa;
+    border: 1px solid #e0e5ec;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: #333;
+    max-height: 140px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+  .card-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .btn-copy {
+    background: #003087;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.2s;
+  }
+  .btn-copy:hover { background: #004ab3; }
+  .btn-copy.copied { background: var(--green); }
+  .btn-official {
+    font-size: 0.78rem; color: #003087; text-decoration: none;
+    border: 1px solid #003087; border-radius: 6px; padding: 7px 12px;
+    transition: all 0.2s;
+  }
+  .btn-official:hover { background: #003087; color: white; }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.78rem;
+    color: #aaa;
+    border-top: 1px solid var(--border);
+    margin-top: 10px;
+  }
+
+
+  @media (max-width: 600px) {
+    header, .section-header { padding-left: 15px; padding-right: 15px; }
+    .prompts-grid { padding: 15px; grid-template-columns: 1fr; }
+    .legend { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="brand">
+    <div style="height:56px;width:56px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:1.9rem;flex-shrink:0;">🕎</div>
+    <div>
+      <h1>Chabad of Brookmont — Grant Scout</h1>
+      <p class="subtitle">Open the page, read the table, copy a prompt when ready to apply.</p>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex-shrink:0;">
+    <img src="rabbi.avif" alt="The Rebbe" style="height:72px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.35));">
+    <span style="font-size:0.82rem;opacity:0.92;letter-spacing:0.04em;font-style:italic;">Good luck — B"H</span>
+  </div>
+  <div class="last-updated">
+    Last updated<br><strong id="last-updated-time">Loading...</strong>
+  </div>
+</header>
+
+<!-- LEGEND BAR -->
+<div style="background:white;border-bottom:1px solid var(--border);padding:8px 30px;display:flex;gap:18px;flex-wrap:wrap;align-items:center;">
+  <div class="legend-item"><span class="dot dot-green"></span> New this scan</div>
+  <div class="legend-item"><span class="dot dot-red"></span> Urgent — closing ≤ 4 days</div>
+  <div class="legend-item"><span class="dot dot-yellow"></span> Approaching — ≤ 45 days</div>
+  <div class="legend-item"><span class="dot dot-gray"></span> Normal</div>
+  <label class="legend-item" style="margin-left:auto;cursor:pointer;gap:6px;user-select:none;">
+    <input type="checkbox" id="hide-closed" onchange="toggleClosed(this)" style="cursor:pointer;"> Hide closed grants
+  </label>
+</div>
+
+<!-- GRANTS TABLE SECTION -->
+<div class="section-header">📋 Grant Opportunities</div>
+<div class="table-wrap">
+  <table id="grants-table">
+    <thead>
+      <tr>
+        <th onclick="sortTable(0)">Funder / Program <span class="sort-arrow">⇅</span></th>
+        <th onclick="sortTable(1)">Category <span class="sort-arrow">⇅</span></th>
+        <th onclick="sortTable(2)">Amount <span class="sort-arrow">⇅</span></th>
+        <th onclick="sortTable(3)">Deadline <span class="sort-arrow">⇅</span></th>
+        <th onclick="sortTable(4)">Status <span class="sort-arrow">⇅</span></th>
+        <th>Application</th>
+        <th>Notes</th>
+        <th style="width:36px;"></th>
+      </tr>
+    </thead>
+    <tbody id="grants-body"></tbody>
+  </table>
+</div>
+
+<!-- CHATGPT PROMPTS SECTION -->
+<div class="section-header" style="margin-top:10px;">💬 ChatGPT Application Prompts</div>
+<div class="prompts-grid" id="prompts-grid"></div>
+
+<!-- FOOTER -->
+<footer>
+  Chabad of Brookmont Grant Scout · Serving Brookmont, Bannockburn, Cabin John, Glen Echo &amp; greater Bethesda, MD · Amounts are researched estimates — confirm on the funder's official page before applying · Built with Claude
+</footer>
+
+
+<script>
+// ─── GRANT DATA ──────────────────────────────────────────────────────────────
+// This block is replaced each morning by the grant scout agent.
+// GRANT_DATA_START
+const GRANTS = [
+  {
+    id: 1,
+    funder: "Keren Hashluchim (Merkos 302)",
+    program: "New Shluchim Seed Funding",
+    category: "Chabad Network",
+    amount: "Varies (seed grants)",
+    amountNum: 15000,
+    deadline: null,
+    status: "OPEN",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://kerenhashluchim.org/",
+    notes: "The single most on-target funder: seed grants specifically for newly appointed shluchim opening new Chabad centers (35 couples funded last round). Apply via portal.kerenhashluchim.org — eligibility runs on the shlichus appointment, not 501(c)(3) history. Also ask about Simcha Fund and CKids After School grants once children's programs launch.",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a new 501(c)(3) Jewish nonprofit in Brookmont, Maryland (Montgomery County, led by Rabbi Leibel Simpson), apply for Keren Hashluchim New Shluchim Seed Funding.
+
+GRANT: New Shluchim Seed Funding
+FUNDER: Keren Hashluchim (Merkos 302 ecosystem)
+AMOUNT: Varies — seed funding for new Chabad centers
+DEADLINE: Rolling — apply via portal.kerenhashluchim.org
+PURPOSE: Seed funding to newly appointed Chabad shluchim establishing new centers.
+
+ABOUT THE ORGANIZATION:
+- Chabad of Brookmont was founded in 2026 by Rabbi Leibel and Devora Simpson, newly appointed shluchim serving Brookmont, Bannockburn, Cabin John, Glen Echo, and the greater Bethesda area in Montgomery County, Maryland — minutes from Washington, DC
+- The area has had little consistent Jewish infrastructure; this is the first Chabad presence dedicated to these Potomac-riverside neighborhoods
+- Current programs: weekly Shabbat and holiday dinners, minyanim, adult education and Torah classes, women's events (challah bakes), children's programs launching
+- Community chesed: fresh challah delivered weekly to Jewish residents; matzah before Pesach and honey cake packages before Rosh Hashanah
+- Currently operating from the shluchim's residence; near-term goal is renting a dedicated Chabad space
+
+PROJECT TO FUND:
+Core startup costs of the new shlichus: program expenses for Shabbat/holiday hospitality, children's program launch, and first-year costs toward a rented community space.
+
+Please write a warm, mission-driven application (or letter to the fund) including:
+1. The shluchim's story and appointment to this shlichus
+2. The community: who lives here, why now, early traction (dinners, deliveries, classes)
+3. Vision for year one and the dedicated-space goal
+4. Budget summary of startup and program costs
+5. How seed funding unlocks growth
+
+Write in an inspiring but concrete tone appropriate for a Chabad-internal funder that knows the shlichus model well.`
+  },
+  {
+    id: 2,
+    funder: "Jewish Federation of Greater Washington",
+    program: "JShield Community Security Initiative + security grant support",
+    category: "Security",
+    amount: "Free assessments, training & grant help",
+    amountNum: 5000,
+    deadline: null,
+    status: "OPEN",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://shalomdc.org/security-grant-support",
+    notes: "Not a competitive grant — call the Federation (703-522-7464) NOW. JShield gives Jewish orgs of all sizes free security assessments, training, and hands-on help writing FEMA NSGP and Maryland PAHC applications (the assessment is the prerequisite for both). This relationship also opens the door to future Federation community funding.",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a new 501(c)(3) Jewish nonprofit in Brookmont, Maryland (Montgomery County, led by Rabbi Leibel Simpson), write an outreach email to the Jewish Federation of Greater Washington's JShield security program.
+
+PROGRAM: JShield Community Security Initiative
+FUNDER: Jewish Federation of Greater Washington (backed by JFNA LiveSecure / Secure Community Network)
+WHAT THEY OFFER: Free building security assessments, training, emergency planning, threat information, and hands-on help applying for federal (FEMA NSGP) and Maryland (PAHC) security grants
+PURPOSE OF THIS EMAIL: Introduce the new Chabad, request a security consultation/walkthrough, and get on JShield's radar for grant application support.
+
+ABOUT THE ORGANIZATION:
+- Chabad of Brookmont, founded 2026 by Rabbi Leibel and Devora Simpson — the first Chabad presence serving Brookmont, Bannockburn, Cabin John, and Glen Echo in Montgomery County, MD
+- Registered US 501(c)(3); hosts regular Shabbat and holiday dinners, prayer services, classes, and children's programming
+- Currently operating from a private residence with public-facing Jewish programming (a real security consideration in the current climate); planning to rent a dedicated space
+
+Please write a concise, professional introduction email (under 300 words) to the JShield team that:
+1. Introduces the new Chabad and its programming
+2. Requests a security assessment/consultation, noting the home-based setting today and the planned dedicated space
+3. Asks to be added to their lists for NSGP (via DC HSEMA's National Capital Region pool) and Maryland PAHC application support and training
+4. Offers to provide 501(c)(3) documentation
+
+Tone: warm, professional, community-partnership oriented.`
+  },
+  {
+    id: 3,
+    funder: "Jewish Helping Hands",
+    program: "Tikkun Olam Grants (basic necessities incl. food)",
+    category: "Food Security",
+    amount: "Up to $10,000",
+    amountNum: 10000,
+    deadline: "2026-09-09",
+    status: "OPEN",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://jewishhelpinghands.org/grants",
+    notes: "Inquiry form due Sept 9, 2026; full application Dec 3, 2026. Funds grassroots food/basic-needs projects. Honest caveat: they prioritize vulnerable populations — center the application on homebound seniors and isolated/struggling residents reached by the weekly challah delivery, not general community engagement. 100% of funds must go to the program (no admin/salaries).",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a new 501(c)(3) Jewish nonprofit in Brookmont, Maryland (Montgomery County, led by Rabbi Leibel Simpson), apply for a Jewish Helping Hands Tikkun Olam Grant.
+
+GRANT: Tikkun Olam Grants — basic necessities (food)
+FUNDER: Jewish Helping Hands
+AMOUNT: Up to $10,000 (100% must go to direct program costs — no admin or salaries)
+DEADLINE: Inquiry form September 9, 2026; full application December 3, 2026
+PURPOSE: Grassroots projects providing basic necessities — including food — to vulnerable populations.
+
+ABOUT THE ORGANIZATION:
+- Chabad of Brookmont serves Brookmont, Bannockburn, Cabin John, Glen Echo, and the greater Bethesda area in Montgomery County, Maryland
+- Registered US 501(c)(3) nonprofit, founded 2026
+- Runs a weekly fresh challah delivery to Jewish residents and distributes holiday food packages (matzah before Passover, honey cakes before Rosh Hashanah)
+
+PROJECT TO FUND — IMPORTANT FRAMING:
+Center the application on the VULNERABLE people this food program reaches: homebound and isolated seniors, elderly residents without nearby family, and households quietly struggling — the weekly delivery doubles as a wellness check and human connection. Do NOT frame it as general community engagement in an affluent area.
+
+Project: "Challah & Connection" — expanding the weekly kosher food delivery and holiday packages to more homebound seniors and families in need across Montgomery County, with volunteer deliverers trained to check in on recipients.
+
+Please write the inquiry (and be ready to expand to a full application) including:
+1. Organization description and food-delivery track record
+2. The vulnerable population served (homebound seniors, isolated residents) and the need
+3. Project plan: recipients, frequency, volunteer model, wellness-check component
+4. Budget: 100% direct program costs (food, packaging, delivery)
+5. Measurable outcomes (recipients served, deliveries made, isolation reduced)
+
+Tone: humble, human, chesed-centered.`
+  },
+  {
+    id: 4,
+    funder: "Greater Washington Community Foundation",
+    program: "DIVAs Giving Circle — youth arts & wellbeing (Letter of Interest)",
+    category: "Children & Youth",
+    amount: "Varies",
+    amountNum: 5000,
+    deadline: "2026-08-27",
+    status: "OPEN",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://www.thecommunityfoundation.org/open-grant-opportunities",
+    notes: "LOI due Aug 27, 2026 — the one currently-open Montgomery County opportunity, but the fit is marginal: apply only if the children's programming honestly includes an arts component (e.g., Jewish music/crafts or challah-baking framed as youth culinary arts & wellbeing). Assume a preference for secular programming — a community-services framing (or the sub-nonprofit) helps.",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a new 501(c)(3) nonprofit in Brookmont, Maryland (Montgomery County), submit a Letter of Interest to the Greater Washington Community Foundation's DIVAs giving circle (Donors InVesting in the Arts).
+
+GRANT: 2026 DIVAs Request for Letters of Interest
+FUNDER: Greater Washington Community Foundation — DIVAs giving circle
+AMOUNT: Varies
+DEADLINE: August 27, 2026
+PURPOSE: Arts programs for Montgomery County youth that promote mental health, wellbeing, and resilience.
+
+IMPORTANT — FRAMING: Lead with the community-services and youth-arts mandate, NOT religious identity. Describe the organization as a community nonprofit serving Montgomery County families.
+
+ABOUT THE ORGANIZATION (use this framing):
+- Chabad of Brookmont is a community nonprofit (501(c)(3), founded 2026) serving families in Brookmont, Bannockburn, Cabin John, Glen Echo, and greater Bethesda
+- Launching children's and family programming rooted in hands-on cultural arts
+
+PROGRAM TO FUND:
+"Young Makers & Bakers" — a youth cultural-arts series for Montgomery County children: hands-on baking arts (challah braiding as culinary art), music, storytelling, and craft workshops designed to build connection, confidence, and wellbeing in a screen-free, intergenerational setting.
+
+Please write a compelling Letter of Interest (1 page) including:
+1. Organization intro (community nonprofit serving MoCo families)
+2. The program: activities, arts disciplines, frequency
+3. How it promotes youth mental health, wellbeing, and resilience (social connection, mastery, intergenerational bonds)
+4. Youth served (ages, expected numbers, open to all)
+5. Budget ballpark and what DIVAs funding would cover
+
+Tone: warm, arts-forward, wellbeing-focused. Avoid religious framing; the program is cultural and open to all children.`
+  },
+  {
+    id: 5,
+    funder: "OneTable",
+    program: "Shabbat Dinner Nourishment Credits",
+    category: "Jewish Community",
+    amount: "$10/RSVP, up to $100–$300 per dinner",
+    amountNum: 300,
+    deadline: null,
+    status: "OPEN",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://onetable.org/hosting/",
+    notes: "Per-dinner food subsidies for peer-led Shabbat dinners for young adults (21–39). The Simpsons are in-range and can host peer-style dinners; ask help@onetable.org about a formal organizational partnership to brand dinners. Note: OneTable restructured incentives in Jan 2026 (points system) — confirm current terms.",
+    chatgptPrompt: `You are helping Rabbi Leibel and Devora Simpson of Chabad of Brookmont (Brookmont, Maryland) make the most of OneTable's Shabbat dinner funding.
+
+PROGRAM: OneTable Nourishment Credits
+FUNDER: OneTable
+AMOUNT: $10 per RSVP plus $10 for the host, up to $100 per dinner (elevated dinners up to $300)
+DEADLINE: Rolling — post dinners on the OneTable platform
+PURPOSE: Subsidizes food costs for peer-led Shabbat dinners for young adults ages 21–39 (not in undergrad).
+
+CONTEXT:
+- The Simpsons are a young couple hosting weekly Shabbat dinners in the Brookmont/Bethesda area near Washington, DC
+- Many young Jewish professionals in the DC area have no local Shabbat community
+- OneTable's model is peer-led (not clergy-led institutional events), so dinners should be posted personally and feel like a peer gathering
+
+Please produce:
+1. A OneTable host profile bio for Leibel and Devora (warm, peer-toned, not rabbinic)
+2. Three sample dinner listings (title + description) for young-professional Shabbat dinners in Brookmont/Bethesda — e.g., "Challah & Chill on the Potomac"
+3. A short email to help@onetable.org asking about a formal organizational partnership for Chabad of Brookmont and confirming current nourishment-credit terms after the 2026 program changes
+
+Tone: authentic, young, welcoming — this is peer hospitality, not synagogue marketing.`
+  },
+  {
+    id: 6,
+    funder: "Harold Grinspoon Foundation / PJ Library",
+    program: "Get Together Microgrants (+ free PJ Library books)",
+    category: "Children & Youth",
+    amount: "$100 per gathering (up to 5/yr per family)",
+    amountNum: 500,
+    deadline: null,
+    status: "OPEN",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://pjlibrary.org/gettogether",
+    notes: "Grants go to PJ Library subscriber FAMILIES, not the org — a creative workaround: have Devora and 3–4 local families each apply (up to 5×$100/yr each) to seed challah bakes, Shabbat gatherings, and holiday events. Coordinate with the Federation, which runs the formal PJ Library partnership in Greater Washington.",
+    chatgptPrompt: `You are helping families connected to Chabad of Brookmont (Brookmont, Maryland) use PJ Library Get Together Microgrants to seed Jewish family programming.
+
+PROGRAM: PJ Library Get Together Microgrants
+FUNDER: Harold Grinspoon Foundation / PJ Library
+AMOUNT: $100 per gathering, up to 5 grants per family per calendar year
+DEADLINE: Rolling
+PURPOSE: Covers hosting expenses for PJ Library subscriber families hosting low-prep Jewish-themed gatherings (Shabbat, challah bakes, holidays) with at least two other Jewish families.
+
+CONTEXT:
+- Chabad of Brookmont (founded 2026) is building family programming in Brookmont, Bannockburn, Cabin John, Glen Echo, and greater Bethesda, MD
+- The grants are awarded to subscriber families, not organizations — so the strategy is: sign up local families for PJ Library (free books, available in every US zip code), then have several families (including the rebbetzin) apply for microgrants to host gatherings
+- The formal PJ Library community partnership in Greater Washington runs through the Jewish Federation — coordinate, don't duplicate
+
+Please produce:
+1. A short, friendly message the rabbi can send to local families explaining PJ Library (free Jewish children's books) and inviting them to sign up
+2. A sample Get Together microgrant application for a family hosting a "Challah Bake & Story Time" for 3+ families
+3. Three more gathering ideas that fit the microgrant rules (Shabbat picnic, Havdalah s'mores night, holiday crafts)
+4. A checklist: subscribe → plan gathering → apply → host → share photos
+
+Tone: warm, parent-to-parent, practical.`
+  },
+  {
+    id: 7,
+    funder: "Montgomery County, MD — Office of Grants Management",
+    program: "Nonprofit Security Grant Program (county NSP)",
+    category: "Security",
+    amount: "$2,500 – $15,000",
+    amountNum: 8750,
+    deadline: null,
+    status: "UPCOMING",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://www.montgomerycountymd.gov/office-grants-management/grant-programs",
+    notes: "The most realistic first security grant: county program explicitly for nonprofit AND faith-based orgs at hate-crime risk (90+ awardees in FY26, incl. synagogues). FY26 supplemental was restricted to prior recipients — catch the next open cycle, expected ~Sept–Oct 2026. Sign up for the OGM Grant Opportunities Newsletter NOW. Small awards (cameras, training) are plausible even at the current home base.",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a new 501(c)(3) Jewish nonprofit in Brookmont, Maryland (Montgomery County, led by Rabbi Leibel Simpson), apply for the Montgomery County Nonprofit Security Grant Program.
+
+GRANT: Nonprofit Security Grant Program (county NSP)
+FUNDER: Montgomery County, MD — Office of Grants Management / OEMHS
+AMOUNT: $2,500 – $15,000 per award
+DEADLINE: Next cycle expected to open ~September–October 2026 via the OGM portal
+PURPOSE: Security personnel, assessments and planning, training, drills, and security cameras for nonprofit and faith-based organizations at high risk of hate crimes.
+
+ABOUT THE ORGANIZATION:
+- Chabad of Brookmont serves Brookmont, Bannockburn, Cabin John, Glen Echo, and greater Bethesda in Montgomery County, MD
+- Registered US 501(c)(3), founded 2026; the visible Jewish institution for these neighborhoods
+- Hosts regular public-facing Jewish programming: Shabbat and holiday dinners, prayer services, classes, women's and children's events
+- Currently operating from a residence used as the congregation's gathering place; a dedicated rented space is planned
+
+SECURITY NEEDS (customize as applicable):
+- Professional security assessment (coordinate with JShield's free assessment)
+- Security cameras and monitoring at the program location
+- Reinforced entry / access control
+- Security personnel for High Holiday and large public events
+- Staff/volunteer security training and drills
+
+Please write a complete county grant application including:
+1. Organization description and 501(c)(3) status
+2. Threat context: documented rise in antisemitic incidents; regular publicly advertised Jewish gatherings
+3. Proposed security measures with itemized budget ($2,500–$15,000 range)
+4. How measures protect participants (families, children, seniors)
+5. Capacity to implement and report
+
+Tone: factual, safety-focused, appropriate for county government review.`
+  },
+  {
+    id: 8,
+    funder: "Maryland Governor's Office of Crime Prevention and Policy (GOCPP)",
+    program: "Protecting Against Hate Crimes (PAHC) Grant Program",
+    category: "Security",
+    amount: "Up to $200,000 (FY25 avg ~$62K; tiered by org budget)",
+    amountNum: 62000,
+    deadline: null,
+    status: "WATCH",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://gocpp.maryland.gov/grants/programs/pahc/",
+    notes: "Maryland's $10M/yr state security program — faith-based orgs explicitly eligible, small-budget orgs get their own tier, no match required. SFY2027 deadline passed (Apr 24, 2026); the SFY2028 NOFA should post ~Feb–Mar 2027. ACTION NOW: register in SAM.gov and get a UEI (required), and get the JShield assessment done so the application is ready.",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a new 501(c)(3) Jewish nonprofit in Brookmont, Maryland (Montgomery County, led by Rabbi Leibel Simpson), prepare for the Maryland Protecting Against Hate Crimes (PAHC) Grant.
+
+GRANT: Protecting Against Hate Crimes (PAHC) Grant Program — SFY2028 cycle
+FUNDER: Maryland Governor's Office of Crime Prevention and Policy (GOCPP)
+AMOUNT: Up to $200,000; awards tiered by organizational budget (small orgs compete in their own tier; FY25 average ~$62,000). No cost share required.
+DEADLINE: SFY2028 NOFA expected ~February–March 2027 (SFY2027 closed April 24, 2026)
+PURPOSE: Security enhancements — personnel, cameras, alarms, structural hardening, training, and anti-hate awareness — for Maryland nonprofits and faith-based organizations whose facilities and membership can be targeted for hate crimes.
+
+ABOUT THE ORGANIZATION:
+- Chabad of Brookmont serves Brookmont, Bannockburn, Cabin John, Glen Echo, and greater Bethesda in Montgomery County, MD
+- Registered US 501(c)(3), founded 2026, very small budget (small-org tier)
+- Regular public Jewish programming: Shabbat/holiday dinners, services, classes, children's events; weekly challah deliveries across the area
+- Operating today from the congregation's residence-based gathering place; dedicated rented space planned — tailor the facility description to whichever is current at application time
+
+Please write a complete PAHC application including:
+1. Organization description, 501(c)(3) status, SAM.gov/UEI registration
+2. Risk statement: rise in antisemitic hate crimes in Maryland; the org's visibility as the area's Jewish institution
+3. Proposed security project: assessment-driven measures (cameras, access control, lighting, training, event security personnel)
+4. Itemized budget appropriate to a small-org tier request
+5. Implementation timeline and reporting capacity
+
+Tone: professional, evidence-based, appropriate for a state government NOFA response.`
+  },
+  {
+    id: 9,
+    funder: "DHS/FEMA via DC HSEMA (National Capital Region)",
+    program: "Nonprofit Security Grant Program (NSGP-UA) — FY2027",
+    category: "Security",
+    amount: "Up to $200,000 per site",
+    amountNum: 200000,
+    deadline: null,
+    status: "WATCH",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://hsema.dc.gov/nsgp",
+    notes: "IMPORTANT ROUTING: Montgomery County is in the National Capital Region, so NSGP applications go through DC HSEMA's NSGP-UA pool — NOT Maryland MDEM. FY2026 closed July 2026; FY2027 NOFO expected ~May–June 2027. Blocker: NSGP funds a specific facility with a vulnerability assessment — realistic once the dedicated space is rented. JShield will help write the application for free.",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a new 501(c)(3) Jewish nonprofit in Brookmont, Maryland (Montgomery County, led by Rabbi Leibel Simpson), prepare a FY2027 FEMA Nonprofit Security Grant Program application.
+
+GRANT: Nonprofit Security Grant Program (NSGP-UA), FY2027
+FUNDER: DHS/FEMA — administered for the National Capital Region by DC HSEMA (Montgomery County applicants apply through DC HSEMA, not Maryland MDEM)
+AMOUNT: Up to $200,000 per site
+DEADLINE: FY2027 NOFO expected ~May–June 2027 (subapplication deadlines run earlier — watch hsema.dc.gov/nsgp)
+PURPOSE: Physical security hardening (cameras, reinforced doors, access control, lighting, security personnel, training) for 501(c)(3) nonprofits — explicitly including houses of worship — at high risk of terrorist or hate-motivated attack.
+
+ABOUT THE ORGANIZATION:
+- Chabad of Brookmont serves Brookmont, Bannockburn, Cabin John, Glen Echo, and greater Bethesda in Montgomery County, MD
+- Registered US 501(c)(3), founded 2026; the Jewish institution for these neighborhoods, hosting publicly advertised services, dinners, classes, and children's programs
+- Application should be tied to the organization's dedicated facility (the rented Chabad space) — houses of worship may use a self-assessment for the required vulnerability assessment; JShield (Jewish Federation of Greater Washington) provides free assessment and application help
+
+Please write a complete NSGP investment justification including:
+1. Organization description and mission
+2. Threat/risk assessment: documented antisemitic incidents nationally and in the DC region; the facility's visibility and public programming
+3. Vulnerability assessment summary and how proposed items address each vulnerability
+4. Proposed target-hardening items with itemized budget (up to $200,000)
+5. Milestones and implementation timeline
+6. Impact on the organization's ability to operate safely
+
+Tone: formal, threat-informed, aligned with FEMA investment-justification scoring criteria.`
+  },
+  {
+    id: 10,
+    funder: "Greater Washington Community Foundation",
+    program: "Sharing Montgomery Fund",
+    category: "Community Programming",
+    amount: "Varies",
+    amountNum: 20000,
+    deadline: null,
+    status: "WATCH",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://www.thecommunityfoundation.org/open-grant-opportunities",
+    notes: "Competitive grants for nonprofits serving Montgomery County's low-income residents. 2026–27 LOI closed July 7, 2026 — next LOI ~summer 2027; join GWCF's email list now. Frame around the food-delivery/community-services work (community foundations fund non-sectarian services, not worship) — or route through the secular sub-501(c)(3) if created.",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a 501(c)(3) nonprofit in Brookmont, Maryland (Montgomery County), prepare a Letter of Interest for the Greater Washington Community Foundation's Sharing Montgomery Fund.
+
+GRANT: Sharing Montgomery Fund
+FUNDER: Greater Washington Community Foundation
+AMOUNT: Varies (general operating and program grants)
+DEADLINE: Next Letter of Interest expected ~summer 2027
+PURPOSE: Supports high-impact nonprofits serving Montgomery County's low-income residents.
+
+IMPORTANT — FRAMING: Community foundations fund non-sectarian direct services. Lead with the food-security and social-connection work, open to all county residents in need — NOT religious programming. If a secular community-services affiliate exists by then, apply through it.
+
+ABOUT THE ORGANIZATION (use this framing):
+- A community nonprofit (501(c)(3)) in Montgomery County running a weekly fresh-bread delivery and holiday food-package program that doubles as a wellness check for homebound seniors and isolated residents
+- Volunteer-powered, neighborhood-scale, high-touch — every delivery is a doorstep visit
+
+PROGRAM TO FUND:
+Expansion of the weekly food delivery and check-in program to more low-income and homebound Montgomery County residents, plus volunteer coordination.
+
+Please write a 1-page Letter of Interest including:
+1. Organization intro and service model
+2. Need: food insecurity and social isolation among county seniors/residents
+3. Program description, current reach, expansion plan
+4. Outcomes and how impact is measured
+5. Funding request and budget ballpark
+
+Tone: direct-service focused, outcomes-oriented, non-sectarian.`
+  },
+  {
+    id: 11,
+    funder: "Montgomery County — Office of Food Systems Resilience",
+    program: "Community Food Assistance & Food Recovery Grants",
+    category: "Food Security",
+    amount: "Varies (FY26 CFA round: $428K across 6 orgs)",
+    amountNum: 30000,
+    deadline: null,
+    status: "WATCH",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://montgomerycountymd.gov/ofsr/foodrecovery.html",
+    notes: "County funding for nonprofit food assistance/distribution — FY26 awardees already include faith-affiliated groups. FY26 awarded; watch the OGM forecast for FY27/FY28 NOFOs and email OFSR (heather.bruskin@montgomerycountymd.gov) to get on the list. Caveat: targets food-INSECURE residents — a documented need-based track (or the secular food sub-501(c)(3)) would substantially strengthen eligibility.",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a 501(c)(3) nonprofit in Brookmont, Maryland (Montgomery County), prepare for Montgomery County's Community Food Assistance grant programs.
+
+GRANT: Community Food Assistance & Food Recovery Grant Programs
+FUNDER: Montgomery County Office of Food Systems Resilience (OFSR) / Office of Grants Management
+AMOUNT: Varies (FY26 food-assistance round totaled $428,202 across six organizations)
+DEADLINE: Watch the OGM Grant Program Forecast for the next NOFO
+PURPOSE: Nonprofit food assistance, recovery, and redistribution operations (and cold-storage/transport infrastructure) serving food-insecure Montgomery County residents.
+
+IMPORTANT — FRAMING: These grants target FOOD-INSECURE residents. Build the application around a need-based distribution track: homebound seniors, fixed-income households, and residents referred by county services — with the weekly delivery infrastructure as proven capacity. Faith affiliation is not disqualifying (FY26 awardees include faith-affiliated orgs), but the funded activity must be need-based food assistance.
+
+ABOUT THE ORGANIZATION:
+- Runs an established weekly fresh-bread (challah) delivery route and holiday food-package distribution across Brookmont, Bannockburn, Cabin John, Glen Echo, and greater Bethesda
+- Volunteer deliverers provide doorstep wellness checks alongside food
+- 501(c)(3), founded 2026
+
+PROJECT TO FUND:
+A need-based expansion: dedicated deliveries of fresh food packages to food-insecure and homebound county residents (self-identified or referred), plus packaging supplies and volunteer coordination.
+
+Please write a complete application including:
+1. Organization and current delivery operation
+2. Target population and evidence of county food-insecurity need
+3. Program design: intake/referral, delivery logistics, dignity-preserving approach
+4. Budget (food, packaging, transport, coordination)
+5. Outcomes: households served, deliveries/month, partnerships
+
+Tone: practical, logistics-strong, county-services aware.`
+  },
+  {
+    id: 12,
+    funder: "USDA NIFA",
+    program: "Community Food Projects Competitive Grant Program (CFPCGP)",
+    category: "Food Security",
+    amount: "$25,000 – $400,000 (1:1 match required)",
+    amountNum: 100000,
+    deadline: null,
+    status: "WATCH",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://www.nifa.usda.gov/grants/programs/community-food-projects-competitive-grant-program-cfpcgp",
+    notes: "Federal food-security grants for private nonprofits (no religious exclusion stated). FY2026 closed July 16, 2026; next NOFO ~June 2027. THE clearest case for the SUB-NONPROFIT strategy: a secular-facing food-security 501(c)(3) (e.g., 'Brookmont Community Food Project') serving low-income residents would compete far better than a congregation. 1:1 match + federal reporting = 2027 stretch goal.",
+    chatgptPrompt: `You are helping plan a USDA Community Food Projects application for the food-security work founded by Chabad of Brookmont (Brookmont, Maryland, Montgomery County).
+
+GRANT: Community Food Projects Competitive Grant Program (CFPCGP), FY2027
+FUNDER: USDA National Institute of Food and Agriculture (NIFA)
+AMOUNT: $25,000 – $400,000; 1:1 match required
+DEADLINE: FY2027 NOFO expected ~June 2027
+PURPOSE: Community food-security projects that meet the food needs of low-income people and strengthen local food systems.
+
+STRATEGIC CONTEXT — SUB-NONPROFIT:
+The strongest applicant is a secular-facing food-security 501(c)(3) (working name: "Brookmont Community Food Project") spun out of the weekly challah delivery and holiday food-package operation, serving low-income Montgomery County residents regardless of faith. Federal reporting and the 1:1 match require real capacity — treat this as a 2027 goal and plan accordingly.
+
+Please produce a planning package including:
+1. A one-page concept note for the Brookmont Community Food Project: mission, need (county food-insecurity data), program design (fresh food delivery + wellness checks + local food partnerships), target population
+2. A checklist for standing up the sub-nonprofit: incorporation, 501(c)(3) application (or fiscal sponsorship as a faster bridge), EIN, SAM.gov/UEI, board
+3. A match strategy: in-kind volunteer hours, donated food, local partner contributions
+4. A draft project budget at the $50,000–$100,000 scale with 1:1 match shown
+5. Timeline working backward from a ~June 2027 NOFO
+
+Tone: strategic and concrete — this is a planning document, not yet the application.`
+  },
+  {
+    id: 13,
+    funder: "The Covenant Foundation",
+    program: "Ignition Grants (Jewish education)",
+    category: "Jewish Education",
+    amount: "Up to $35,000 (1 year)",
+    amountNum: 35000,
+    deadline: null,
+    status: "WATCH",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://covenantfn.org/grants/",
+    notes: "Funds NEW, untested ideas in Jewish education — perfect stage-fit for a 2026 startup (no minimum operating history stated). 2026 LOI passed (Feb 24); monitor from Dec 2026 for the 2027 LOI (historically late Feb). One LOI per org per year — pitch one distinctive educational concept, not general operating support.",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a new 501(c)(3) Jewish nonprofit in Brookmont, Maryland (Montgomery County, led by Rabbi Leibel Simpson), prepare a Covenant Foundation Ignition Grant Letter of Inquiry.
+
+GRANT: Ignition Grants
+FUNDER: The Covenant Foundation
+AMOUNT: Up to $35,000 for one year
+DEADLINE: 2027 LOI expected late February 2027 (monitor covenantfn.org from December 2026)
+PURPOSE: Funds new, untested ideas in Jewish education.
+
+ABOUT THE ORGANIZATION:
+- Chabad of Brookmont (founded 2026) serves Brookmont, Bannockburn, Cabin John, Glen Echo, and greater Bethesda, MD — a riverside cluster of neighborhoods with no prior Jewish educational infrastructure
+- Current education: adult education and Torah classes, women's learning events, children's programming launching
+
+CONCEPT TO PITCH (develop one distinctive, NEW idea — examples to build from):
+Option A: "Torah on the Towpath" — outdoor, nature-based Jewish family learning along the C&O Canal/Potomac (experiential education for unaffiliated families)
+Option B: "The Challah Curriculum" — a hands-on family education series where each week's bake carries a Jewish-learning arc (text, values, practice) that families take home
+Option C: Micro-cohort adult learning for DC-area professionals: short-form, high-level Jewish text study designed for policy/professional culture
+
+Please write a compelling Letter of Inquiry including:
+1. The organization and the educational gap in this community
+2. The ONE big idea: what's genuinely new about it
+3. Learners served, learning goals, and format
+4. Year-one plan and what $35,000 funds
+5. How success is measured and what growth looks like
+
+Tone: intellectually serious, innovative, education-first — Covenant funds educators with ideas, not institutions with needs.`
+  },
+  {
+    id: 14,
+    funder: "The Natan Fund",
+    program: "Jewish Connections Grants",
+    category: "Jewish Community",
+    amount: "$20,000 – $30,000",
+    amountNum: 25000,
+    deadline: null,
+    status: "WATCH",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://www.natan.org/apply",
+    notes: "Funds innovative, EMERGING orgs (startups explicitly welcome; first-time grantees capped at $1.5M budgets — we're far under). 2026–27 initial applications closed; sign up on natan.org/apply for the next RFP notification. Pitch the distinctive engagement model (home-based hospitality + weekly doorstep challah network), not standard synagogue operations.",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a new 501(c)(3) Jewish nonprofit in Brookmont, Maryland (founded 2026), prepare a Natan Fund Jewish Connections application.
+
+GRANT: Jewish Connections Grants
+FUNDER: The Natan Fund
+AMOUNT: $20,000 – $30,000 typical
+DEADLINE: Next RFP — sign up for notification at natan.org/apply
+PURPOSE: Funds innovative, emerging organizations connecting people to Jewish practice, experiences, culture, and community in North America.
+
+POSITIONING — WHAT'S INNOVATIVE (lead with this, not standard synagogue operations):
+- A "doorstep Judaism" model: the weekly challah delivery is a standing, personal, home-to-home Jewish touchpoint reaching residents no institution reaches — each loaf is a relationship
+- Home-based radical hospitality in a neighborhood cluster (Brookmont, Bannockburn, Cabin John, Glen Echo) that has never had Jewish infrastructure — community built in living rooms and backyards before any building
+- Founded 2026, donation-funded, budget far under Natan's $1.5M first-time-grantee cap — exactly the emerging-org profile Natan prioritizes
+
+Please write a complete application including:
+1. The model: doorstep Judaism + home hospitality as a replicable engagement approach for institution-less suburbs
+2. The community and evidence of traction (households reached weekly, dinner attendance, class participation)
+3. What the grant funds: scaling the delivery network, host-family kits, program growth toward a dedicated space
+4. Outcomes: engagement metrics Natan cares about (new/returning participants, depth of connection)
+5. Team: the Simpsons' story
+6. Budget summary
+
+Tone: startup-energy, model-driven, metrics-aware.`
+  },
+  {
+    id: 15,
+    funder: "Mayberg Foundation",
+    program: "Jewish education / community grantmaking",
+    category: "Jewish Education",
+    amount: "Varies",
+    amountNum: 20000,
+    deadline: null,
+    status: "RELATIONSHIP",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://www.mayberg.org/",
+    notes: "Major Jewish-education family foundation headquartered in Chevy Chase, MD — essentially next door. No unsolicited applications; this is a networking play where geography is Leibel's advantage: seek a warm intro through local Jewish education circles or invite the family to a program. Their MyZuzah initiative (free kosher mezuzahs) is directly usable for the community now.",
+    chatgptPrompt: `You are helping Rabbi Leibel Simpson of Chabad of Brookmont (Brookmont, Maryland) build a relationship with the Mayberg Foundation, a Jewish-education family foundation headquartered in nearby Chevy Chase, MD.
+
+FUNDER: Mayberg Foundation (initiatives include the Jewish Education Innovation Challenge, Momentum, MyZuzah)
+AMOUNT: Varies — no open application process; grants flow through relationships
+GOAL: A warm, genuine relationship — not a cold ask.
+
+CONTEXT:
+- Chabad of Brookmont (founded 2026) serves Brookmont, Bannockburn, Cabin John, Glen Echo, and greater Bethesda — minutes from the foundation's Chevy Chase base
+- Programs: adult education and Torah classes, women's events, children's programming launching, weekly challah delivery
+- Immediate practical tie-in: MyZuzah provides free kosher mezuzahs — a perfect fit for a community where many homes lack one
+
+Please produce:
+1. A short, warm introduction letter/email to the Mayberg Foundation introducing the new Chabad and its education-first vision for these neighborhoods — no funding ask; invite them to a Shabbat dinner or class
+2. A MyZuzah outreach plan: how to enroll local families for free mezuzahs and turn each installation into an educational home visit
+3. Three relationship-building steps over 6 months (shared contacts in Jewish education, attending JEIC-adjacent events, program invitations)
+4. Notes on what the foundation funds (bold Jewish education ideas) so future conversations are aligned
+
+Tone: relational, education-centered, patient — the grant conversation comes later.`
+  },
+  {
+    id: 16,
+    funder: "Walmart / Walmart Foundation",
+    program: "Spark Good Local Grants (FY27 Cycle 3)",
+    category: "Corporate",
+    amount: "$250 – $5,000",
+    amountNum: 2625,
+    deadline: "2026-11-30",
+    status: "OPEN",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://www.walmart.org/how-we-give/program-guidelines/spark-good-local-grants-guidelines",
+    notes: "OPEN NOW (Cycle 3: Aug 1 – Nov 30, 2026). Guidelines EXPLICITLY allow faith-based orgs whose project benefits the community at large (food pantries etc.) — the challah delivery/holiday packages fit exactly. Start now: create a Spark Good account on Walmart.com/nonprofits and complete Deed verification (takes time). Apply to the Walmart/Sam's Club nearest Bethesda.",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a new 501(c)(3) Jewish nonprofit in Brookmont, Maryland (Montgomery County, led by Rabbi Leibel Simpson), apply for a Walmart Spark Good Local Grant.
+
+GRANT: Spark Good Local Grants (FY27 Cycle 3)
+FUNDER: Walmart / Walmart Foundation (local store giving)
+AMOUNT: $250 – $5,000
+DEADLINE: November 30, 2026 (cycle opened August 1, 2026)
+PURPOSE: Small cash grants from local Walmart stores/Sam's Clubs for community-serving projects in the store's service area.
+
+ELIGIBILITY NOTE: Walmart's guidelines explicitly allow a faith-based organization when the proposed project benefits the community at large (they name food pantries, soup kitchens, clothing closets). Frame the request around the FOOD DISTRIBUTION program.
+
+ABOUT THE ORGANIZATION:
+- Chabad of Brookmont serves Brookmont, Bannockburn, Cabin John, Glen Echo, and greater Bethesda in Montgomery County, MD
+- Registered US 501(c)(3), founded 2026
+- Runs a weekly fresh challah delivery to residents — including homebound seniors — and distributes holiday food packages (matzah before Passover, honey cakes before Rosh Hashanah)
+
+PROJECT TO FUND:
+Food and packaging costs for the weekly community bread-delivery and holiday food-package program serving Montgomery County residents, with volunteer doorstep check-ins for isolated seniors.
+
+Please write a concise Spark Good application including:
+1. Brief organization description (community food-distribution lead)
+2. Project overview: what is delivered, to whom, how often
+3. Community benefit and approximate people served
+4. Simple budget for the $250–$5,000 range (ingredients, packaging, delivery supplies)
+5. Connection to the local Walmart store's community
+
+Tone: friendly, concrete, local.`
+  },
+  {
+    id: 17,
+    funder: "Giant Food (Landover, MD)",
+    program: "Community donations + Community Bag Program",
+    category: "Food Security",
+    amount: "Varies (product/gift cards; $1 per bag sold)",
+    amountNum: 1000,
+    deadline: null,
+    status: "OPEN",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://giantfood.2givelocal.com/",
+    notes: "Two easy rolling tracks with Montgomery County's dominant grocer: (1) letterhead request to the Bethesda-area store manager for gift-card/product donations, (2) apply on 2givelocal to be a monthly Community Bag beneficiary (small dollars, builds the relationship). No religious exclusion found — frame as community food distribution. Careful: giantfood.com (Landover MD) is the right company, NOT giantfoodstores.com (PA).",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a new 501(c)(3) nonprofit in Brookmont, Maryland (Montgomery County), request support from Giant Food.
+
+PROGRAM: Community donations/sponsorships + Community Bag Program
+FUNDER: Giant Food (Landover, MD — Ahold Delhaize; the DC/MD/VA grocer, not the PA-based GIANT Company)
+AMOUNT: Varies — product or gift-card donations; Community Bag pays $1 per reusable bag sold at a chosen store during a benefiting month
+DEADLINE: Rolling
+PURPOSE: Supports 501(c)(3)s that feed people in need and help children/families in Giant's footprint.
+
+ABOUT THE ORGANIZATION:
+- Chabad of Brookmont runs a weekly fresh challah delivery across Brookmont, Bannockburn, Cabin John, Glen Echo, and greater Bethesda — reaching homebound seniors and isolated residents — plus holiday food packages
+- Registered US 501(c)(3), founded 2026; volunteers shop locally (including at Giant) for ingredients and package contents
+
+Please produce:
+1. A one-page donation request letter (on letterhead) to the store manager of the Bethesda-area Giant, asking for gift cards or product donations to support the weekly community food-delivery program — lead with hunger relief and senior wellness checks, include 501(c)(3) details
+2. A short organization description (under 150 words) for the Community Bag "Submit Your Organization" form at giantfood.2givelocal.com
+3. Two sentences on how the partnership will be acknowledged (delivery-bag tags, community emails)
+
+Tone: local, grateful, hunger-relief focused.`
+  },
+  {
+    id: 18,
+    funder: "M&T Bank",
+    program: "The M&T Charitable Foundation",
+    category: "Corporate",
+    amount: "Varies (lighter process under $10,000)",
+    amountNum: 5000,
+    deadline: null,
+    status: "OPEN",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://www.mtb.com/about-us/getting-involved/giving-back/charitable-foundation",
+    notes: "Rolling online portal (mtb.versaic.com) with a low-documentation tier under $10K — winnable for a tiny new org; extensive Montgomery County branches. Exclusion: no grants to religious orgs 'for non-secular purposes' — apply for the secular community-service side (food delivery, children's programs open to all). Submit 8+ weeks before funds are needed.",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a new 501(c)(3) nonprofit in Brookmont, Maryland (Montgomery County), apply to The M&T Charitable Foundation.
+
+GRANT: M&T Charitable Foundation community grant
+FUNDER: M&T Bank
+AMOUNT: Request under $10,000 (lighter documentation tier)
+DEADLINE: Rolling — submit via mtb.versaic.com at least 8 weeks before funds are needed
+PURPOSE: Supports 501(c)(3) public charities serving communities where M&T does business (including Maryland/DC).
+
+IMPORTANT — FRAMING: M&T does not fund religious organizations for non-secular purposes. Apply ONLY for the secular, community-wide services: the weekly food delivery with senior wellness checks and community programs open to all residents. Do not request funding for worship or religious education.
+
+ABOUT THE ORGANIZATION (use this framing):
+- A community nonprofit (501(c)(3), founded 2026) in Montgomery County, MD running a weekly fresh-bread delivery that doubles as a doorstep wellness check for homebound seniors, plus holiday food packages and family/children's community events open to all
+- Volunteer-powered and neighborhood-scale in Brookmont, Bannockburn, Cabin John, Glen Echo, and greater Bethesda
+
+PROJECT TO FUND:
+Expansion of the weekly community food-delivery and senior check-in program: food costs, packaging, volunteer coordination, and outreach to reach more isolated residents.
+
+Please write a complete application including:
+1. Organization description (community-services lead)
+2. Community need: senior isolation and food access in Montgomery County
+3. Program description and expansion plan
+4. Budget under $10,000
+5. Outcomes: households served, deliveries, senior check-ins
+6. Why M&T: local branches, shared community
+
+Tone: professional, community-banking aligned, outcomes-focused.`
+  },
+  {
+    id: 19,
+    funder: "Costco Wholesale",
+    program: "Charitable Contributions (warehouse giving)",
+    category: "Children & Youth",
+    amount: "Varies (typically low thousands)",
+    amountNum: 2500,
+    deadline: null,
+    status: "OPEN",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://www.costco.com/charitable-giving.html",
+    notes: "Rolling; one request per Costco fiscal year (Sept–Aug); focus on children, education, health & human services. CAVEAT: Costco excludes religious orgs propagating a specific faith — a direct Chabad application will likely be screened out. Prime candidate for the secular sub-501(c)(3) as applicant. Re-read the exclusion wording on the page before applying.",
+    chatgptPrompt: `You are helping plan a Costco Charitable Contributions request for the community-services work founded by Chabad of Brookmont (Brookmont, Maryland, Montgomery County).
+
+GRANT: Costco Charitable Contributions
+FUNDER: Costco Wholesale (warehouse/corporate giving)
+AMOUNT: Varies — typically low thousands
+DEADLINE: Rolling; ONE request per Costco fiscal year (September–August)
+PURPOSE: Supports 501(c)(3)s focused on children, education, and health & human services where Costco operates.
+
+STRATEGIC CONTEXT:
+Costco excludes religious organizations seeking to propagate a specific faith. The strongest applicant is the planned secular community-services 501(c)(3) (working name: "Brookmont Community Food Project") that runs the need-based food delivery and open-to-all children's programming. If that entity is not yet formed, weigh whether to apply this fiscal year at all — the single annual request should not be wasted on a likely screen-out.
+
+Please produce:
+1. A recommendation: apply now as the Chabad (with strictly secular community-service framing) vs. wait for the sub-nonprofit — with reasoning
+2. A draft application for the stronger path: organization description, program (food delivery with senior wellness checks + children's community programming), population served in Montgomery County, request amount and budget
+3. A note on which DC-area Costco warehouse to approach and how (warehouse-level giving)
+
+Tone: practical and strategic first, then warm and community-focused in the draft.`
+  },
+  {
+    id: 20,
+    funder: "GEICO (Chevy Chase, MD HQ)",
+    program: "GEICO Philanthropic Foundation",
+    category: "Food Security",
+    amount: "Varies",
+    amountNum: 5000,
+    deadline: "2026-12-31",
+    status: "UPCOMING",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://www.geico.com/about/in-the-community/geico-cares/",
+    notes: "Annual window historically Oct 1 – Dec 31; food insecurity is a named funding area and HQ is in Chevy Chase — minutes away, strong hometown story. Guidelines exclude religious orgs, so this is a top sub-501(c)(3) candidate. ACTION: email communityfunding@geico.com in September to confirm the Oct 1 opening (portal link not currently displayed).",
+    chatgptPrompt: `You are helping plan a GEICO Philanthropic Foundation application for the community food work founded by Chabad of Brookmont (Brookmont, Maryland, Montgomery County).
+
+GRANT: GEICO Philanthropic Foundation annual grants
+FUNDER: GEICO (headquartered in Chevy Chase, MD — minutes from Brookmont)
+AMOUNT: Varies
+DEADLINE: Application window historically October 1 – December 31 (confirm via communityfunding@geico.com in September)
+PURPOSE: Education, community engagement including food insecurity, and health/wellness.
+
+STRATEGIC CONTEXT:
+GEICO's guidelines exclude religious organizations, so the strongest applicant is the planned secular community-services 501(c)(3) ("Brookmont Community Food Project") running the need-based food delivery. The hometown angle is powerful: a Chevy Chase-headquartered insurer funding food security in its own backyard.
+
+Please produce:
+1. A short September email to communityfunding@geico.com confirming the application window and eligibility for a new Montgomery County food-security nonprofit
+2. A draft application: organization description (secular food-security entity), the weekly delivery + senior wellness-check model, Montgomery County need data, budget request, outcomes
+3. The hometown framing paragraph: GEICO's Chevy Chase roots and a program serving neighbors within minutes of HQ
+
+Tone: professional, local-impact focused.`
+  },
+  {
+    id: 21,
+    funder: "Lowe's",
+    program: "Lowe's Hometowns / Community Impact Grants",
+    category: "Capital/Space",
+    amount: "~$10,000 – $100,000 (renovation)",
+    amountNum: 10000,
+    deadline: null,
+    status: "WATCH",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://corporate.lowes.com/our-responsibilities/community-impact/faqs",
+    notes: "Funds physical renovation of community spaces. Official FAQ: religious orgs ARE eligible if the renovated space serves ALL members of the community. 2026 window closed (Feb 18 – Mar 20); next intake ~Feb 2027 — which lines up with the plan to rent a dedicated space. Anyone 21+ can nominate the project.",
+    chatgptPrompt: `You are helping Chabad of Brookmont, a 501(c)(3) nonprofit in Brookmont, Maryland (Montgomery County), prepare a Lowe's Hometowns nomination for its future rented community space.
+
+GRANT: Lowe's Hometowns / Community Impact Grants
+FUNDER: Lowe's
+AMOUNT: Varies (historically ~$10,000 – $100,000 renovation projects)
+DEADLINE: Next nomination window expected ~February 2027 (2026 window closed March 20)
+PURPOSE: Physical renovation/improvement of community spaces — community centers, food pantries, gathering spaces.
+
+ELIGIBILITY NOTE: Lowe's FAQ states religious organizations ARE eligible when the renovated space provides services to ALL members of the community. Center the community-wide uses: the food-packing kitchen for the weekly delivery program, the community room open for neighborhood events, and children's program space.
+
+ABOUT THE ORGANIZATION:
+- Chabad of Brookmont (501(c)(3), founded 2026) serves Brookmont, Bannockburn, Cabin John, Glen Echo, and greater Bethesda, MD
+- Currently home-based; renting a dedicated community space is the near-term goal — this grant would fund its build-out
+
+PROJECT TO NOMINATE:
+Build-out of the newly rented community space: a food-packing kitchen for the weekly bread delivery and holiday food packages, an accessible community room for open neighborhood programming, and a safe children's activity area.
+
+Please write the nomination including:
+1. The organization and its community-wide services
+2. The space and the renovation scope (kitchen, community room, accessibility, children's area)
+3. Who benefits: all community members — food-delivery recipients, seniors, families, children
+4. Volunteer story (Lowe's loves volunteer-powered projects)
+5. Rough scope/budget
+
+Tone: hands-on, community-space focused, welcoming to all.`
+  },
+  {
+    id: 22,
+    funder: "Lockheed Martin (Bethesda HQ)",
+    program: "Charitable Contributions — Community Resilience",
+    category: "Corporate",
+    amount: "Varies",
+    amountNum: 10000,
+    deadline: null,
+    status: "RELATIONSHIP",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://www.lockheedmartin.com/en-us/who-we-are/communities/applying-for-contributions.html",
+    notes: "Invitation-only (no unsolicited requests), but HQ is in Bethesda and 'Community Resilience' covers community needs where employees live; exclusion is only 'religious organizations for religious purposes'. Play: recruit Lockheed employees among community members — employee volunteering and matching gifts (CyberGrants) are the practical entry points toward an invitation.",
+    chatgptPrompt: `You are helping Rabbi Leibel Simpson of Chabad of Brookmont (Brookmont, Maryland) build a path to Lockheed Martin community funding.
+
+FUNDER: Lockheed Martin (headquartered in Bethesda, MD)
+PROGRAM: Corporate Charitable Contributions — Community Resilience focus area
+STATUS: Invitation-only — Lockheed does NOT accept unsolicited grant requests; exclusion applies only to religious organizations "for religious purposes", so community-service work qualifies once invited
+PRACTICAL ENTRY POINTS: employee volunteering and matching gifts (via CyberGrants), then relationship-driven invitation
+
+Please produce a 12-month cultivation plan including:
+1. A short note the rabbi can share with community members asking (gently) whether anyone works at Lockheed Martin or knows its community-relations team
+2. How Lockheed employees can direct matching gifts and volunteer-hour grants to the 501(c)(3) via CyberGrants — a simple explainer for them
+3. A one-paragraph "Community Resilience" positioning of the food-delivery and senior check-in program (community needs where Lockheed employees live)
+4. The eventual introduction email to Lockheed community relations — after employee connections exist
+
+Tone: patient, relationship-first, corporate-appropriate.`
+  },
+  {
+    id: 23,
+    funder: "J. Willard & Alice S. Marriott Foundation",
+    program: "DC-region grantmaking",
+    category: "Corporate",
+    amount: "Varies (larger, multi-year grants)",
+    amountNum: 25000,
+    deadline: null,
+    status: "RELATIONSHIP",
+    appStatus: "Not started",
+    isNew: true,
+    url: "https://www.jwasmarriottfoundation.org/",
+    notes: "Major Bethesda-based (Marriott family) foundation whose core geography IS the Washington DC region. Invitation-only — treat as a 2–3 year cultivation target once the org has a track record; a general inquiry email exploring fit is the accepted first step. Distinct from Marriott International corporate giving (also no unsolicited requests).",
+    chatgptPrompt: `You are helping Rabbi Leibel Simpson of Chabad of Brookmont (Brookmont, Maryland) begin cultivating the J. Willard and Alice S. Marriott Foundation.
+
+FUNDER: J. Willard & Alice S. Marriott Foundation (Marriott family foundation, Bethesda; distinct from Marriott International corporate giving)
+GEOGRAPHY: The Washington, DC region is its core grantmaking area — Chabad of Brookmont is squarely inside it
+STATUS: Invitation-only; no unsolicited proposals (invited applicants use a Fluxx portal). A general inquiry email exploring fit is the accepted first step. Realistic horizon: 2–3 years, once the organization has a track record.
+
+Please produce:
+1. A brief, well-crafted general inquiry email introducing the organization and asking whether its community food-delivery, senior-connection, and family programming in Bethesda-area neighborhoods aligns with the foundation's thriving-communities interests — explicitly NOT a funding request, just exploring fit
+2. A "track record" checklist: what the org should be able to show in 2–3 years (audited financials or reviewed statements, outcomes data, board, annual report)
+3. Two relationship-building moves in the Bethesda philanthropic community that could lead to a warm introduction
+
+Tone: understated, professional, long-game.`
+  }
+];
+// GRANT_DATA_END
+
+// ─── STATUS OPTIONS ───────────────────────────────────────────────────────────
+const APP_STATUS_OPTIONS = ["Not started", "Applied", "Awarded", "Declined"];
+const statusOrder = { "OPEN": 0, "UPCOMING": 1, "WATCH": 2, "RELATIONSHIP": 3, "CLOSED": 4 };
+
+// ─── LOAD SAVED APP STATUSES FROM LOCALSTORAGE ────────────────────────────────
+function getSavedStatuses() {
+  try { return JSON.parse(localStorage.getItem("grantStatuses") || "{}"); } catch(e) { return {}; }
+}
+function saveStatus(id, val) {
+  const s = getSavedStatuses(); s[id] = val;
+  localStorage.setItem("grantStatuses", JSON.stringify(s));
+}
+
+// ─── COLOUR ROW CLASS ─────────────────────────────────────────────────────────
+function rowClass(grant) {
+  if (grant.status === "CLOSED") return "row-closed";
+  const today = new Date();
+  if (grant.deadline) {
+    const dl = new Date(grant.deadline);
+    const days = (dl - today) / 86400000;
+    if (days >= 0 && days <= 4) return "row-urgent";
+    if (days > 4 && days <= 45) return "row-approaching";
+  }
+  if (grant.isNew) return "row-new";
+  return "row-normal";
+}
+
+function deadlineClass(deadline) {
+  if (!deadline) return "";
+  const today = new Date();
+  const dl = new Date(deadline);
+  const days = (dl - today) / 86400000;
+  if (days < 0) return "";
+  if (days <= 4) return "urgent";
+  if (days <= 45) return "soon";
+  return "";
+}
+
+function formatDeadline(dl) {
+  if (!dl) return "—";
+  const d = new Date(dl);
+  return d.toLocaleDateString("en-US", { year:"numeric", month:"short", day:"numeric" });
+}
+
+function statusPill(s) {
+  const map = { OPEN:"pill-open", UPCOMING:"pill-upcoming", WATCH:"pill-watch", RELATIONSHIP:"pill-relationship", CLOSED:"pill-closed" };
+  return `<span class="pill ${map[s]||'pill-closed'}">${s}</span>`;
+}
+function appPill(s) {
+  const map = { "Not started":"pill-not-started", "Applied":"pill-applied", "Awarded":"pill-awarded", "Declined":"pill-declined" };
+  return map[s] || "pill-not-started";
+}
+
+// ─── EXPAND HELPERS ──────────────────────────────────────────────────────────
+function grantPurpose(g) {
+  return g.chatgptPrompt.match(/PURPOSE: ([^\n]+)/)?.[1]?.trim() || g.notes;
+}
+function grantFit(g) {
+  const m = g.chatgptPrompt.match(/ABOUT THE ORGANIZATION[^\n]*\n([\s\S]+?)(?:\n\n)/);
+  return m?.[1]?.trim() || '';
+}
+function toggleExpand(id) {
+  const row = document.getElementById('detail-' + id);
+  const btn = document.querySelector('tr[data-id="' + id + '"] .expand-btn');
+  const open = row.style.display !== 'none';
+  row.style.display = open ? 'none' : 'table-row';
+  btn.classList.toggle('open', !open);
+}
+
+// ─── HIDE CLOSED TOGGLE ──────────────────────────────────────────────────────
+function toggleClosed(cb) {
+  localStorage.setItem("hideClosed", cb.checked ? "1" : "0");
+  renderTable();
+}
+
+// ─── RENDER TABLE ─────────────────────────────────────────────────────────────
+function renderTable() {
+  const saved = getSavedStatuses();
+  const hideClosed = localStorage.getItem("hideClosed") === "1";
+  const sorted = [...GRANTS]
+    .filter(g => !hideClosed || g.status !== "CLOSED")
+    .sort((a, b) => {
+      const so = (statusOrder[a.status]||99) - (statusOrder[b.status]||99);
+      if (so !== 0) return so;
+      if (a.deadline && b.deadline) return new Date(a.deadline) - new Date(b.deadline);
+      return 0;
+    });
+
+  const tbody = document.getElementById("grants-body");
+  tbody.innerHTML = sorted.map(g => {
+    const appStatus = saved[g.id] || g.appStatus;
+    const dlClass = deadlineClass(g.deadline);
+    return `<tr class="${rowClass(g)}" data-id="${g.id}">
+      <td>
+        <div class="funder-name">${g.funder}</div>
+        <div class="program-name">${g.program}</div>
+        <a href="${g.url}" target="_blank" class="grant-link">🔗 Official page</a>
+      </td>
+      <td>${g.category}</td>
+      <td class="amount">${g.amount}</td>
+      <td class="deadline ${dlClass}">${formatDeadline(g.deadline)}</td>
+      <td>${statusPill(g.status)}</td>
+      <td>
+        <select class="status-select ${appPill(appStatus)}" onchange="updateAppStatus(${g.id}, this.value)">
+          ${APP_STATUS_OPTIONS.map(o => `<option value="${o}" ${o===appStatus?"selected":""}>${o}</option>`).join("")}
+        </select>
+      </td>
+      <td style="font-size:0.8rem;color:#555;max-width:220px;">${g.notes}</td>
+      <td style="width:36px;padding:4px 2px;text-align:center;vertical-align:middle;">
+        <button class="expand-btn" onclick="toggleExpand(${g.id})" title="Show summary">▾</button>
+      </td>
+    </tr>
+    <tr class="detail-row" id="detail-${g.id}" style="display:none">
+      <td colspan="8">
+        <div class="detail-panel">
+          <div class="detail-block">
+            <h4>What this grant funds</h4>
+            <p>${escapeHtml(grantPurpose(g))}</p>
+          </div>
+          <div class="detail-block">
+            <h4>Why Chabad qualifies</h4>
+            <p>${escapeHtml(grantFit(g))}</p>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join("");
+}
+
+function updateAppStatus(id, val) {
+  saveStatus(id, val);
+  const sel = document.querySelector(`tr[data-id="${id}"] .status-select`);
+  if (sel) {
+    sel.className = `status-select ${appPill(val)}`;
+  }
+}
+
+// ─── RENDER PROMPT CARDS ──────────────────────────────────────────────────────
+function renderPrompts() {
+  const active = GRANTS.filter(g => g.status !== "CLOSED");
+  const grid = document.getElementById("prompts-grid");
+  grid.innerHTML = active.map(g => `
+    <div class="prompt-card">
+      <h3>${g.funder}</h3>
+      <div class="prompt-meta">
+        <span>📌 ${g.program}</span>
+        <span>💰 ${g.amount}</span>
+        <span>📅 ${formatDeadline(g.deadline)}</span>
+      </div>
+      <div class="prompt-text" id="prompt-${g.id}">${escapeHtml(g.chatgptPrompt)}</div>
+      <div class="card-actions">
+        <button class="btn-copy" onclick="copyPrompt(${g.id}, this)">📋 Copy ChatGPT instructions</button>
+        <a class="btn-official" href="${g.url}" target="_blank">🔗 Official page</a>
+      </div>
+    </div>
+  `).join("");
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function copyPrompt(id, btn) {
+  const grant = GRANTS.find(g => g.id === id);
+  if (!grant) return;
+  navigator.clipboard.writeText(grant.chatgptPrompt).then(() => {
+    const orig = btn.innerHTML;
+    btn.innerHTML = "✅ Copied!";
+    btn.classList.add("copied");
+    setTimeout(() => { btn.innerHTML = orig; btn.classList.remove("copied"); }, 2000);
+  });
+}
+
+// ─── SORT TABLE ───────────────────────────────────────────────────────────────
+let sortDir = {};
+function sortTable(col) {
+  sortDir[col] = !sortDir[col];
+  const tbody = document.getElementById("grants-body");
+  const rows = Array.from(tbody.querySelectorAll("tr"));
+  rows.sort((a, b) => {
+    const aT = a.cells[col]?.innerText || "";
+    const bT = b.cells[col]?.innerText || "";
+    return sortDir[col] ? aT.localeCompare(bT) : bT.localeCompare(aT);
+  });
+  rows.forEach(r => tbody.appendChild(r));
+}
+
+
+// ─── LAST UPDATED ─────────────────────────────────────────────────────────────
+// LAST_UPDATED_START
+const LAST_UPDATED = "2026-08-01T14:31:05";
+// LAST_UPDATED_END
+
+function setLastUpdated() {
+  const d = new Date(LAST_UPDATED);
+  document.getElementById("last-updated-time").textContent =
+    d.toLocaleDateString("en-US", { weekday:"short", year:"numeric", month:"short", day:"numeric" });
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+document.getElementById("hide-closed").checked = localStorage.getItem("hideClosed") === "1";
+renderTable();
+renderPrompts();
+setLastUpdated();
+</script>
+</body>
+</html>
